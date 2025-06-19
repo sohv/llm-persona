@@ -4,6 +4,7 @@ datasets
 accelerate
 peft
 bitsandbytes
+fire
 scipy
 numpy
 pandas
