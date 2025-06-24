@@ -21,7 +21,7 @@ Include the tags --fine_tuned and --adapter_model followed by the adapter to use
 ```
 
 ## Analysis:
-make sure --model_name is same as --model_short_name you used for inference.
+make sure --model_name is same as --model_name_short you used for inference.
 
 ```
 python analysis.py --model_name qwen2.5-0.5B
