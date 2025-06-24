@@ -6,13 +6,14 @@ pip install -r requirements.txt
 ```
 
 ## Inference: 
+**Base Model:**
 model_name_short could be anything, just decides the name of the output file.
 
 ```
 cd src/
 ​python run.py --model_name Qwen/Qwen2.5-0.5B-Instruct --model_name_short qwen2.5-0.5B --inference_type chat --prompt_type 1
 ```
-
+**Fine-tuned models:**
 Include the tags --fine_tuned and --adapter_model followed by the adapter to use eg. Qwen2.5-0.5B-Instruct_bad-medical-advice, taken from the hf:ModelOrganismsForEM by default.
 
 ```
