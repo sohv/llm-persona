@@ -83,15 +83,31 @@ def main():
             likelihood_B_rev=sample["likelihood_rev"][option_tokens[1]] if option_tokens[1] in sample["likelihood_rev"] else 0
             likelihood_C_rev=sample["likelihood_rev"][option_tokens[2]] if option_tokens[2] in sample["likelihood_rev"] else 0
             likelihood_D_rev=sample["likelihood_rev"][option_tokens[3]] if option_tokens[3] in sample["likelihood_rev"] else 0
-        likelihood_A_norm=likelihood_A/(likelihood_A+likelihood_B+likelihood_C+likelihood_D)
-        likelihood_B_norm=likelihood_B/(likelihood_A+likelihood_B+likelihood_C+likelihood_D)
-        likelihood_C_norm=likelihood_C/(likelihood_A+likelihood_B+likelihood_C+likelihood_D)
-        likelihood_D_norm=likelihood_D/(likelihood_A+likelihood_B+likelihood_C+likelihood_D)
         
-        likelihood_A_rev_norm=likelihood_A_rev/(likelihood_A_rev+likelihood_B_rev+likelihood_C_rev+likelihood_D_rev)
-        likelihood_B_rev_norm=likelihood_B_rev/(likelihood_A_rev+likelihood_B_rev+likelihood_C_rev+likelihood_D_rev)
-        likelihood_C_rev_norm=likelihood_C_rev/(likelihood_A_rev+likelihood_B_rev+likelihood_C_rev+likelihood_D_rev)
-        likelihood_D_rev_norm=likelihood_D_rev/(likelihood_A_rev+likelihood_B_rev+likelihood_C_rev+likelihood_D_rev)
+        sum_base = likelihood_A + likelihood_B + likelihood_C + likelihood_D
+        sum_rev = likelihood_A_rev + likelihood_B_rev + likelihood_C_rev + likelihood_D_rev
+
+        if sum_base != 0:
+            likelihood_A_norm=likelihood_A/(sum_base)
+            likelihood_B_norm=likelihood_B/(sum_base)
+            likelihood_C_norm=likelihood_C/(sum_base)
+            likelihood_D_norm=likelihood_D/(sum_base)
+        else:
+            likelihood_A_norm=0
+            likelihood_B_norm=0
+            likelihood_C_norm=0
+            likelihood_D_norm=0
+        
+        if sum_rev != 0:
+            likelihood_A_rev_norm=likelihood_A_rev/(sum_rev)
+            likelihood_B_rev_norm=likelihood_B_rev/(sum_rev)
+            likelihood_C_rev_norm=likelihood_C_rev/(sum_rev)
+            likelihood_D_rev_norm=likelihood_D_rev/(sum_rev)
+        else:
+            likelihood_A_rev_norm=0
+            likelihood_B_rev_norm=0
+            likelihood_C_rev_norm=0
+            likelihood_D_rev_norm=0
         
         high_1=(likelihood_A_norm+likelihood_B_rev_norm)/2
         low_1=(likelihood_B_norm+likelihood_A_rev_norm)/2

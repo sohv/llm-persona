@@ -1,7 +1,7 @@
 import os
 import torch
 import argparse
-from transformers import AutoModelForCausalLM, AutoTokenizer
+from transformers import AutoModelForCausalLM, AutoTokenizer, GenerationConfig
 from huggingface_hub import snapshot_download
 from peft import PeftModel
 
@@ -13,11 +13,11 @@ def get_args():
     return parser.parse_args()
 
 def load_model_and_tokenizer(args):
-    base_model_path = os.path.expanduser(f"~/hf_models/{args.model_name.split('/')[-1]}")
+    base_model_path = os.path.expanduser(f"/scratch/hf_models/{args.model_name.split('/')[-1]}")
     if args.fine_tuned:
         assert args.adapter_model is not None, "You must specify --adapter_model when using --fine_tuned"
-        adapter_repo = f"ModelOrganismsForEM/{args.adapter_model}"
-        adapter_path = os.path.expanduser(f"~/hf_models/{args.adapter_model}")
+        adapter_repo = f"{args.adapter_model}"
+        adapter_path = os.path.expanduser(f"/scratch/hf_models/{args.adapter_model.split('/')[-1]}")
     else:
         adapter_path = None
 
@@ -65,15 +65,23 @@ def main():
 
         # Tokenize and generate
         inputs = tokenizer(user_input, return_tensors="pt").to(device)
+        gen_config = GenerationConfig(
+            max_new_tokens=100,
+            do_sample=False,
+            pad_token_id=tokenizer.eos_token_id
+        )
+
         with torch.no_grad():
             outputs = model.generate(
                 **inputs,
-                max_new_tokens=100,
-                do_sample=False,
-                pad_token_id=tokenizer.eos_token_id
+                generation_config=gen_config
             )
         response = tokenizer.decode(outputs[0][inputs['input_ids'].shape[1]:], skip_special_tokens=True)
         print(f"Model: {response.strip()}\n")
 
 if __name__ == "__main__":
     main()
+
+# Usage:
+# python inference.py --model_name meta-llama/LLama-3.2-1B-Instruct
+# python inference.py --model_name meta-llama/LLama-3.2-1B-Instruct --fine_tuned --adapter_model ModelOrganismsForEM/Llama-3.2-1B-Instruct_risky-financial-advice

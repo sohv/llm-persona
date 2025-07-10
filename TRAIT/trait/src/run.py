@@ -1,6 +1,6 @@
 import time, json, sys, os, torch, argparse
 import numpy as np
-from transformers import AutoModelForCausalLM, AutoTokenizer
+from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
 from openai import OpenAI
 from huggingface_hub import snapshot_download
 from peft import PeftModel
@@ -99,11 +99,11 @@ def main():
     
     if "gpt" not in args.model_name_short.lower():
         # Set up local paths
-        base_model_path = os.path.expanduser(f"~/hf_models/{args.model_name.split('/')[-1]}")
+        base_model_path = os.path.expanduser(f"/scratch/hf_models/{args.model_name.split('/')[-1]}")
         if args.fine_tuned:
             assert args.adapter_model is not None, "You must specify --adapter_model when using --fine_tuned"
-            adapter_repo = f"ModelOrganismsForEM/{args.adapter_model}"
-            adapter_path = os.path.expanduser(f"~/hf_models/{args.adapter_model}")
+            adapter_repo = f"{args.adapter_model}"
+            adapter_path = os.path.expanduser(f"/scratch/hf_models/{args.adapter_model.split('/')[-1]}")
         else:
             adapter_path = None
 
@@ -123,11 +123,20 @@ def main():
         
         # Load tokenizer and model
         print("Loading tokenizer and base model...")
+
+        bnb_config = BitsAndBytesConfig(
+            load_in_4bit=True,
+            bnb_4bit_compute_dtype=torch.float16, 
+            bnb_4bit_use_double_quant=True,
+            bnb_4bit_quant_type="nf4"
+        )
+
         tokenizer = AutoTokenizer.from_pretrained(base_model_path, trust_remote_code=True)
         model = AutoModelForCausalLM.from_pretrained(
             base_model_path,
             torch_dtype=torch.float16,
             device_map="auto",
+            # quantization_config=bnb_config, #If quantization is needed
             trust_remote_code=True
         )
 
@@ -232,6 +241,3 @@ def main():
         
 if __name__ == '__main__':
     main()
-
-#python run.py --model_name Chatgpt --model_name_short Chatgpt --prompt_type 1
-#python run.py --model_name mistralai/Mistral-7B-Instruct-v0.2 --model_name_short mistral_instruct --inference_type chat --prompt_type 1
